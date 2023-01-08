@@ -6,14 +6,14 @@
 
 rp_module_id="amiberry"
 rp_module_desc="Amiberry: Commodore Amiga Emulator"
-rp_module_help="ROM Extension: .adf .chd .ipf .lha .zip\n\nCopy Amiga Games To: ${romdir}/amiga\n\nCopy BIOS Files\nkick13.rom\nkick20.rom\nkick31.rom\nTo: ${biosdir}/amiga"
+rp_module_help="ROM Extension: .adf .chd .ipf .lha .zip\n\nCopy Amiga Games To: ${romdir}/amiga\n\nCopy BIOS Files:\n\nkick13.rom\nkick20.rom\nkick31.rom\n\nTo: ${biosdir}/amiga"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/BlitterStudio/amiberry/master/LICENSE"
 rp_module_repo="git https://github.com/BlitterStudio/amiberry :_get_branch_amiberry"
 rp_module_section="opt"
 rp_module_flags="!all arm rpi3 rpi4 64bit"
 
 function _get_branch_amiberry() {
-    download "https://api.github.com/repos/blitterstudiostudio/${md_id}/releases/latest" - | grep -m 1 tag_name | cut -d\" -f4
+    download "https://api.github.com/repos/BlitterStudio/${md_id}/releases/latest" - | grep -m 1 tag_name | cut -d\" -f4
 }
 
 function _get_platform_amiberry() {
@@ -50,14 +50,11 @@ function sources_amiberry() {
     gitPullOrClone
 
     applyPatch "${md_data}/01_preserve_env.patch"
-
-    # Use Default Optimisation Level
-    sed -i "|CFLAGS += -O3|d" "${md_build}/Makefile"
 }
 
 function build_amiberry() {
     local platform
-    platform=$(_get_platform_amiberry)
+    platform="$(_get_platform_amiberry)"
 
     cd external/capsimg || exit
     ./bootstrap
@@ -84,7 +81,7 @@ function install_amiberry() {
 }
 
 function configure_amiberry() {
-    if [[ "$md_mode" == "install" ]]; then
+    if [[ "${md_mode}" == "install" ]]; then
         mkRomDir "amiga"
         mkUserDir "${biosdir}/amiga"
         mkUserDir "${md_conf_root}/amiga"
@@ -95,6 +92,7 @@ function configure_amiberry() {
         for dir in conf nvram savestates screenshots; do
             moveConfigDir "${md_inst}/${dir}" "${md_conf_root}/amiga/${md_id}/${dir}"
         done
+        moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/amiga/${md_id}/"
         moveConfigDir "${md_inst}/kickstarts" "${biosdir}/amiga"
         moveConfigDir "${md_inst}/whdboot" "${md_conf_root}/amiga/${md_id}/whdboot"
         moveConfigFile "${md_inst}/data/cd32.nvr" "${md_conf_root}/amiga/${md_id}/cd32.nvr"
@@ -111,7 +109,7 @@ function configure_amiberry() {
         chown -R "${user}:${user}" "${md_conf_root}/amiga/${md_id}/whdboot"
 
         # Use Shared UAE4ARM/Amiberry Launcher Script While ${md_id}=1
-        sed -e "s|is_${md_id}=0|is_${md_id}=1|" -i "${md_data}/../uae4arm/uae4arm.sh" >"${md_inst}/${md_id}.sh"
+        sed -e "s|is_${md_id}=0|is_${md_id}=1|g" "${md_data}/../uae4arm/uae4arm.sh" >"${md_inst}/amiberry.sh"
         chmod a+x "${md_inst}/${md_id}.sh"
 
         local script="+Start ${md_id}.sh"

@@ -29,6 +29,9 @@ function depends_ags4() {
 
 function sources_ags4() {
     gitPullOrClone
+
+    # Set Default Config Path(s)
+    sed -e "s|.Concat(\".local/share\");|.Concat(\"ArchyPie/configs\");|g" -i "${md_build}/Engine/platform/base/agsplatform_xdg_unix.cpp"
 }
 
 function build_ags4() {
@@ -58,6 +61,8 @@ function configure_ags4() {
     if [[ "${md_mode}" == "install" ]]; then
         mkRomDir "${md_id/4/}"
     fi
+
+    moveConfigDir "${arpdir}/${md_id/4/}" "${md_conf_root}/${md_id/4/}/"
 
     addEmulator 0 "${md_id}" "${md_id/4/}" "${md_inst}/bin/${md_id/4/} --fullscreen %ROM%"
 

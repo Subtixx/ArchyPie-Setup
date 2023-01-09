@@ -34,6 +34,9 @@ function depends_ags() {
 
 function sources_ags() {
     gitPullOrClone
+
+    # Set Default Config Path(s)
+    sed -e "s|.Concat(\".local/share\");|.Concat(\"ArchyPie/configs/${md_id}\");|g" -i "${md_build}/Engine/platform/linux/acpllnx.cpp"
 }
 
 function build_ags() {
@@ -64,6 +67,8 @@ function configure_ags() {
         # Install Eawpatches GUS Patch Set (See: "http://liballeg.org/digmid.html")
         download "http://www.eglebbk.dds.nl/program/download/digmid.dat" - | bzcat >"${md_inst}/bin/patches.dat"
     fi
+
+    moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/${md_id}/"
 
     addEmulator 1 "${md_id}" "${md_id}" "${md_inst}/bin/${md_id} --fullscreen %ROM%"
 

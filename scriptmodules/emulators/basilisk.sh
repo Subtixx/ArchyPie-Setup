@@ -6,11 +6,11 @@
 
 rp_module_id="basilisk"
 rp_module_desc="BasiliskII: Apple Macintosh II Emulator"
-rp_module_help="ROM Extensions: .img .rom\n\nCopy Macintosh Games To: ${romdir}/macintosh"
+rp_module_help="ROM Extensions: .img .rom\n\nCopy Macintosh ROMs (disk.img & mac.rom) To: ${romdir}/macintosh"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/cebix/macemu/master/BasiliskII/COPYING"
 rp_module_repo="git https://github.com/kanjitalk755/macemu.git master"
 rp_module_section="opt"
-rp_module_flags="!mali"
+rp_module_flags=""
 
 function depends_basilisk() {
     local depends=('sdl2' 'vde2')
@@ -20,6 +20,9 @@ function depends_basilisk() {
 
 function sources_basilisk() {
     gitPullOrClone
+
+    # Set Default Config Path(s)
+    applyPatch "${md_data}/01_set_default_config_path.patch"
 }
 
 function build_basilisk() {
@@ -29,6 +32,7 @@ function build_basilisk() {
         '--enable-sdl-audio'
         '--enable-sdl-video'
         '--with-bincue'
+        '--with-sdl2'
         '--with-vdeplug'
         '--without-esd'
         '--without-mon'
@@ -50,12 +54,14 @@ function configure_basilisk() {
     if [[ "${md_mode}" == "install" ]]; then
         mkRomDir "macintosh"
         touch "${romdir}/macintosh/Start.txt"
+        touch "${md_conf_root}/macintosh/${md_id}/basiliskii.cfg"
+        chown "${user}:${user}" "${md_conf_root}/macintosh/${md_id}/basiliskii.cfg"
     fi
 
-    moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/macintosh/"
+    moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/macintosh/${md_id}"
 
     local params=(
-        "--config ${md_conf_root}/macintosh/basiliskii.cfg"
+        "--config ${md_conf_root}/macintosh/${md_id}/basiliskii.cfg"
         "--disk ${romdir}/macintosh/disk.img"
         "--extfs ${romdir}/macintosh"
         "--rom ${romdir}/macintosh/mac.rom"

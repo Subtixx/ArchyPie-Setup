@@ -23,6 +23,7 @@ function depends_advmame() {
 function sources_advmame() {
     gitPullOrClone
 
+    # Set Default Config Path(s)
     applyPatch "${md_data}/01_set_default_config_path.patch"
 }
 
@@ -46,7 +47,7 @@ function install_advmame() {
 }
 
 function configure_advmame() {
-    moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/mame-${md_id}"
+    moveConfigDir "${arpdir}/${md_id}" "${md_conf_root}/mame-${md_id}/"
 
     if [[ "${md_mode}" == "install" ]]; then
         local dirs=(
